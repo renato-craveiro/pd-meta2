@@ -45,9 +45,9 @@ public class UserCallsController {
     @PostMapping("createEvent")
     public ResponseEntity createEvent(Authentication authentication,
                                       @RequestBody String body) throws ParseException {
-        String subject = authentication.getName();
-        Jwt userDetails = (Jwt) authentication.getPrincipal();
-        String scope = userDetails.getClaim("scope");
+        //String subject = authentication.getName();
+        //Jwt userDetails = (Jwt) authentication.getPrincipal();
+        //String scope = userDetails.getClaim("scope");
 
         if(authentication.getAuthorities().toString().contains("ADMIN")){
             String DB_PATH = SQLITEDB;
