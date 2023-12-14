@@ -10,6 +10,7 @@ import pt.isec.pd.types.user;
 import static pt.isec.pd.server.server.SQLITEDB;
 
 @RestController
+@RequestMapping("reg")
 public class RegisterController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody String body) {
@@ -20,6 +21,8 @@ public class RegisterController {
         String password = parts[1];
         String email = parts[2];
         String name = parts[3];
+
+        System.out.println(nestudante+password+email+name);
 
         if(userManager.checkUser(email)){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists.");

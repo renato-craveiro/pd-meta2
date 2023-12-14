@@ -21,6 +21,9 @@ public class event {
     public ArrayList<user> getUsersPresent() {
         return usersPresent;
     }
+    public String getUsersPresentString() {
+        return usersPresent.toString();
+    }
 
 
     ArrayList<user> usersPresent = new ArrayList<>();
@@ -127,8 +130,7 @@ public class event {
 
     @Override
     public String toString() {
-        return "event{ "+"id="+id + " name=" + name + ", local=" + local +", date=" + getFormatDate(date) + ", start=" + getFormatTime(start) + ", end=" + getFormatTime(end) + " code=" + code + " codeValidity=" + getFormatTime(codeValidity) +'}';
-
+        return id + " " + name + " " + local + " " + getFormatDate(date) + " " + getFormatTime(start) + " " + getFormatTime(end) + " " + code + " ";
     }
 
     public String toClientString() {

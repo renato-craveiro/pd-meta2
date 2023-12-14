@@ -1,6 +1,8 @@
 package pt.isec.pd.types;
 
 
+import pt.isec.pd.gui.Event;
+
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * ser único e serve de username.
  *
  */
-public class user implements Serializable {
+public class user extends Event implements Serializable {
     private static final AtomicInteger count = new AtomicInteger(0);
 
     public int getId() {
@@ -33,6 +35,15 @@ public class user implements Serializable {
 
     public user(String name, String NEstudante, String email, String password) {
         this.id = count.incrementAndGet();
+        this.name = name;
+        this.NEstudante = NEstudante;
+        this.email = email;
+        this.password = password;
+    }
+
+    public user(String id, String name, String NEstudante, String email, String password) {
+        super();
+        this.id = Integer.parseInt(id);
         this.name = name;
         this.NEstudante = NEstudante;
         this.email = email;
@@ -77,7 +88,8 @@ public class user implements Serializable {
 
     @Override
     public String toString() {
-        return "user{"+"id="+id + "name=" + name + ", NEstudante=" + NEstudante + ", email=" + email + ", password=" + password + '}';
+        //return "user{"+"id="+id + "name=" + name + ", NEstudante=" + NEstudante + ", email=" + email + ", password=" + password + '}';
+        return " " + id + " " + name + " " + NEstudante + " " + email  + " " + password  + " ";
     }
 
     public boolean isLogged() {

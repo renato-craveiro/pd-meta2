@@ -110,7 +110,7 @@ public class UserCallsController {
         }
     }
 
-    @GetMapping("getEventCode")
+    @GetMapping("getEventCode/")
     public ResponseEntity getEventCode(Authentication authentication,
                                        @RequestParam(value = "id", required = true) String id) throws ParseException {
         String subject = authentication.getName();
@@ -133,7 +133,7 @@ public class UserCallsController {
     }
 
 
-    @GetMapping("getEventPresences")
+    @GetMapping("getEventPresences/")
     public ResponseEntity getEventPresences(Authentication authentication,
                                             @RequestParam(value = "id", required = true) String id) throws ParseException {
         String subject = authentication.getName();
@@ -148,7 +148,7 @@ public class UserCallsController {
             int idEvent = Integer.parseInt(parts[0]);
 
 
-            return ResponseEntity.ok(eventManager.getEventById(idEvent).getUsersPresent());
+            return ResponseEntity.ok(eventManager.getEventById(idEvent).getUsersPresentString());
 
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");

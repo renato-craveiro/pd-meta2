@@ -6,8 +6,13 @@ import pt.isec.pd.client.client;
 import pt.isec.pd.server.request;
 import pt.isec.pd.types.user;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class ClienteController {
 
@@ -22,6 +27,7 @@ public class ClienteController {
 
     public String srvAddress;
     public int srvPort;
+    public String token;
 
     public void setClienteSocket(String srvAddress, int srvPort) {
         this.srvAddress = srvAddress;
@@ -46,141 +52,55 @@ public class ClienteController {
             Event e = new Event(re[0],re[1],re[2],re[3]);
             events.add(e);
 
-
         }
 
     }
 
+    public static String sendRequestAndShowResponse(String uri, String verb, String authorizationValue, String body) throws MalformedURLException, IOException {
 
-    @FXML
-    protected void onSignButton() {
+        String responseBody = null;
+        URL url = new URL(uri);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-        // Hide Login and Sign IN
-        loginBTN.setVisible(false);
-        signBTN.setVisible(false);
-        // Show sign in fields
-        nameTF.setVisible(true);
-        nestudentTF.setVisible(true);
-        emailTF.setVisible(true);
-        passTF.setVisible(true);
-        nameL.setVisible(true);
-        nestudentL.setVisible(true);
-        emailL.setVisible(true);
-        passL.setVisible(true);
-        submitSignBTN.setVisible(true);
+        connection.setRequestMethod(verb);
+        connection.setRequestProperty("Accept", "application/xml, */*");
 
-    }
-
-    @FXML
-    protected void onSignSubmit() {
-
-        String name = nameTF.getText();
-        String nestudent = nestudentTF.getText();
-        String email = emailTF.getText();
-        String password = passTF.getText();
-
-        if (name.isEmpty() || nestudent.isEmpty() || email.isEmpty() || password.isEmpty()) {
-
-            popUpMensage("Error", "Erro: Preencha todos os campos");
-        } else {
-
-            client.currUser = new pt.isec.pd.types.user(name, nestudent, email, password);
-            String response = client.sendRequest("REGISTER","1");
-
-            if (response.equals("User already exists")) {
-                nameTF.clear();
-                nestudentTF.clear();
-                emailTF.clear();
-                passTF.clear();
-
-                popUpMensage("Error", "[Servidor]: " + response);
-
-            }else {
-
-                nameTF.clear();
-                nestudentTF.clear();
-                emailTF.clear();
-                passTF.clear();
-
-                nameTF.setVisible(false);
-                nestudentTF.setVisible(false);
-                emailTF.setVisible(false);
-                passTF.setVisible(false);
-                nameL.setVisible(false);
-                nestudentL.setVisible(false);
-                emailL.setVisible(false);
-                passL.setVisible(false);
-                submitSignBTN.setVisible(false);
-
-                listBTN.setVisible(true);
-                exportBTN.setVisible(true);
-                editBTN.setVisible(true);
-                codeBTN.setVisible(true);
-
-                popUpMensage("Success", "[Servidor]: " + response);
-
-            }
+        if(authorizationValue!=null) {
+            connection.setRequestProperty("Authorization", authorizationValue);
         }
 
-    }
-
-    @FXML
-    protected void onLoginButton() {
-
-        // Hide Login and Sign IN
-        loginBTN.setVisible(false);
-        signBTN.setVisible(false);
-        // Show sign in fields
-        emailTF.setVisible(true);
-        passTF.setVisible(true);
-        emailL.setVisible(true);
-        passL.setVisible(true);
-        submitLoginBTN.setVisible(true);
-
-    }
-
-    @FXML
-    protected void onLoginSubmit() {
-
-        // Get the email and password from the text fields
-        String email = emailTF.getText();
-        String password = passTF.getText();
-
-        // Check if both email and password are not empty
-        if (email.isEmpty() || password.isEmpty()) {
-            // If either email or password is empty, show an error message
-            popUpMensage("Error", "Erro ao fazer login: Preencha ambos os campos");
-        } else {
-            // If both email and password are not empty, proceed with the login operation
-            client.currUser = new pt.isec.pd.types.user("", "", email, password);
-            String response = client.sendRequest("LOGIN", "1");
-
-            if (response.equals("OK")) {
-                // If the login is successful, clear the text fields and adjust visibility
-                emailTF.clear();
-                passTF.clear();
-
-                emailTF.setVisible(false);
-                passTF.setVisible(false);
-                emailL.setVisible(false);
-                passL.setVisible(false);
-                submitLoginBTN.setVisible(false);
-
-                listBTN.setVisible(true);
-                exportBTN.setVisible(true);
-                editBTN.setVisible(true);
-                codeBTN.setVisible(true);
-
-                popUpMensage("Success", "Login efetuado com sucesso");
-            } else {
-                // If the login fails, clear the text fields and show an error message
-                emailTF.clear();
-                passTF.clear();
-
-                popUpMensage("Error", "Credenciais erradas");
-            }
+        if(body!=null){
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "Application/Json");
+            connection.getOutputStream().write(body.getBytes());
         }
+
+        connection.connect();
+
+        int responseCode = connection.getResponseCode();
+        System.out.println("Response code: " +  responseCode + " (" + connection.getResponseMessage() + ")");
+
+        Scanner s;
+
+        if(connection.getErrorStream()!=null) {
+            s = new Scanner(connection.getErrorStream()).useDelimiter("\\A");
+            responseBody = s.hasNext() ? s.next() : null;
+        }
+
+        try {
+            s = new Scanner(connection.getInputStream()).useDelimiter("\\A");
+            responseBody = s.hasNext() ? s.next() : null;
+        } catch (IOException e){}
+
+        connection.disconnect();
+
+        System.out.println(verb + " " + uri + (body==null?"":" with body: "+body) + " ==> " + responseBody);
+        System.out.println();
+
+        return responseBody;
     }
+
+
 
     @FXML
     protected void onListButton() {
@@ -327,47 +247,84 @@ public class ClienteController {
     }
 
     @FXML
-    protected void onCodeSubmit() {
-        // Get the code from the text field
+    protected void onCodeSubmit() throws IOException {
         String code = submitCodeTF.getText();
 
-        // Check if the code is not empty
-        if (code.isEmpty()) {
-            // If the code is empty, show an error message
-            popUpMensage("Error", "Erro ao Inscrever: Código vazio");
-        } else {
-            // If the code is not empty, send the request to the server
-            String response = client.sendRequest("SEND", code);
+        if (code.isEmpty())
+            popUpMensage("Error", "Insira um código");
+        else {
 
-            // Check the response from the server
-            if (response.contains("Inscrito")) {
-                // If the response contains "Inscrito," show a success message
-                popUpMensage("Success", "[Servidor]: " + response);
-            } else {
-                // If the response does not contain "Inscrito," show an error message
-                popUpMensage("Error", "Erro ao Inscrever " + response);
-            }
+            String deleteStr = "http://localhost:8080/usercalls/registerPresence";
 
-            // Clear the text field after submission
-            submitCodeTF.clear();
+            String body = code;
 
-            // Hide the submit code components
-            submitCodeTF.setVisible(false);
-            submitCodeBTN.setVisible(false);
+            deleteStr = sendRequestAndShowResponse(deleteStr, "POST", "bearer " + token, body);
 
-            // Show other buttons
-            listBTN.setVisible(true);
-            exportBTN.setVisible(true);
-            editBTN.setVisible(true);
-            codeBTN.setVisible(true);
+            if (deleteStr.contains("successfully")) {
+                submitCodeTF.clear();
+                popUpMensage("Success", "Presença registada com sucesso");
+            } else if (deleteStr.contains("not found"))
+                popUpMensage("Error", "Nenhum evento com esse id");
+            else
+                popUpMensage("Error", "Erro na comunicação com o server");
         }
+
+
     }
 
     @FXML
-    protected void onExitButton() {
+    protected void onExitButton() {System.exit(0);}
 
-        System.exit(0);
 
+
+
+
+
+
+
+
+
+
+
+    public static String sendRequestAndShowResponse(String uri, String verb, String authorizationValue) throws MalformedURLException, IOException {
+
+        String responseBody = null;
+        URL url = new URL(uri);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setRequestMethod(verb);
+        connection.setRequestProperty("Accept", "application/xml, */*");
+
+        if(authorizationValue!=null) {
+            connection.setRequestProperty("Authorization", authorizationValue);
+        }
+
+        connection.connect();
+
+        int responseCode = connection.getResponseCode();
+        System.out.println("Response code: " +  responseCode + " (" + connection.getResponseMessage() + ")");
+
+        Scanner s;
+
+        if(connection.getErrorStream()!=null) {
+            s = new Scanner(connection.getErrorStream()).useDelimiter("\\A");
+            responseBody = s.hasNext() ? s.next() : null;
+        }
+
+        try {
+            s = new Scanner(connection.getInputStream()).useDelimiter("\\A");
+            responseBody = s.hasNext() ? s.next() : null;
+        } catch (IOException e){}
+
+        connection.disconnect();
+
+        System.out.println(verb + " " + uri + " -> " + responseBody);
+        System.out.println();
+
+        return responseBody;
     }
+
+
+
 
 }

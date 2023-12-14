@@ -14,6 +14,10 @@ public class Event {
         this.horaInicio = horaInicio;
     }
 
+    public Event() {
+
+    }
+
     public String getDescricao() {
         return descricao;
     }
