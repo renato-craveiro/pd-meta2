@@ -6,6 +6,7 @@ import pt.isec.pd.types.user;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class eventManagement {
@@ -61,11 +62,23 @@ public class eventManagement {
     }
 
     public event getEventByCode(String otherParam) {
-        return events.stream().filter((event event) -> event.getCode() == Integer.parseInt(otherParam)).findFirst().get();
+        try {
+            return events.stream().filter(event -> event.getCode() == Integer.parseInt(otherParam)).findFirst().get();
+        } catch (NoSuchElementException e) {
+
+            return null;
+        }
+
     }
 
     public static event getEventById(int id) {
-        return events.stream().filter((event event) -> event.getId() == id).findFirst().get();
+        try {
+            return events.stream().filter((event event) -> event.getId() == id).findFirst().get();
+        } catch (NoSuchElementException e) {
+
+            return null;
+        }
+
     }
 
     public void updateEventDB(int id){

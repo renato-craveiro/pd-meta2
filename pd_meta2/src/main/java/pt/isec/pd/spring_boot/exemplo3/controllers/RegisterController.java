@@ -10,7 +10,6 @@ import pt.isec.pd.types.user;
 import static pt.isec.pd.server.server.SQLITEDB;
 
 @RestController
-@RequestMapping("reg")
 public class RegisterController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody String body) {

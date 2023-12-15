@@ -99,11 +99,16 @@ public class UserCallsController {
             String[] parts = body.split(" ");
             int id = Integer.parseInt(parts[0]);
 
-            if(eventManager.removeEvent(id)){
-                return ResponseEntity.ok("Event deleted successfully. ("+id+")");
-            }else{
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found.");
-            }
+
+
+            if(eventManager.getEventById(id).getUsersPresentString().equals("[]")) {
+                if (eventManager.removeEvent(id))
+                    return ResponseEntity.ok("Event deleted successfully. (" + id + ")");
+            } else
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event has presences");
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found.");
+
 
         }else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");
@@ -179,7 +184,7 @@ public class UserCallsController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found.");
             }
             //eventManager.getEventById(idEvent).addUserPresent(email);
-            return ResponseEntity.ok("Presence registered successfully.)");
+            return ResponseEntity.ok("Presence registered successfully.");
 
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");
@@ -187,44 +192,32 @@ public class UserCallsController {
 
     }
 
+    @GetMapping("eventsPresent")
+    public ResponseEntity getEventsPresent(Authentication authentication) {
+        String subject = authentication.getName();
+        if(authentication.getAuthorities().toString().contains("USER")){
+            String DB_PATH = SQLITEDB;
 
-
-    /*@GetMapping("{type}")
-    public ResponseEntity getText(@PathVariable("type") String type,
-                                  @RequestParam(value="length", required=false) Integer length) {
-
-
-        if (length == null)
-            length = 1;
-
-        return this.generateLorem(type, length, null);
-    }
-
-    @PostMapping
-    public ResponseEntity postText(@RequestBody LoremConfig config) {
-        if (config.getType() == null)
-            return ResponseEntity.badRequest().body("Type is mandatory.");
-
-        if (config.getLength() == null)
-            config.setLength(1);
-
-        return this.generateLorem(config.getType(), config.getLength(), null);
-    }
-
-    private ResponseEntity generateLorem(String type, Integer length, String prefix) {
-        Lorem lorem = LoremIpsum.getInstance();
-
-        switch(type.toLowerCase()) {
-            case "word" -> {
-                return ResponseEntity.ok((prefix==null ? "" : prefix+" -> ") + lorem.getWords(length));
+            eventManagement eventManager = new eventManagement(new EventDatabaseManager(DB_PATH));
+            StringBuilder sb = new StringBuilder();
+            int counter = 0;
+            for (event e : eventManager.getEvents()) {
+                if (e.checkPresenceEmail(subject)) {
+                    sb.append(e.toClientString());
+                    sb.append("\n");
+                    counter++;
+                }
             }
-            case "paragraph" -> {
-                return ResponseEntity.ok((prefix==null ? "" : prefix+" -> ") + lorem.getParagraphs(length, length));
-            }
-            default -> {
-                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Invalid type: " + type +".");
-            }
+            if (counter == 0)
+                return ResponseEntity.ok("Nao foram encontrados eventos!");
+
+
+            return ResponseEntity.ok(sb);
+
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");
         }
-    }*/
+    }
+
 
 }
