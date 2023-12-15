@@ -195,6 +195,7 @@ public class UserCallsController {
     @GetMapping("eventsPresent")
     public ResponseEntity getEventsPresent(Authentication authentication) {
         String subject = authentication.getName();
+
         if(authentication.getAuthorities().toString().contains("USER")){
             String DB_PATH = SQLITEDB;
 
@@ -217,6 +218,18 @@ public class UserCallsController {
         }else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");
         }
+    }
+
+    @GetMapping("getRole")
+    public ResponseEntity getRole(Authentication authentication) {
+
+        if(authentication.getAuthorities().toString().contains("USER"))
+            return  ResponseEntity.ok("User");
+        else if (authentication.getAuthorities().toString().contains("ADMIN"))
+            return ResponseEntity.ok("Admin");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");
+
     }
 
 
