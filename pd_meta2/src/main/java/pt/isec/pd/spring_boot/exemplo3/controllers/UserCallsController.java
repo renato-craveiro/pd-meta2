@@ -99,7 +99,8 @@ public class UserCallsController {
             String[] parts = body.split(" ");
             int id = Integer.parseInt(parts[0]);
 
-
+            if(eventManager.getEventById(id)==null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found.");
 
             if(eventManager.getEventById(id).getUsersPresentString().equals("[]")) {
                 if (eventManager.removeEvent(id))
@@ -129,8 +130,10 @@ public class UserCallsController {
             String[] parts = id.split(" ");
             int idEvent = Integer.parseInt(parts[0]);
 
-
-            return ResponseEntity.ok(eventManager.getEventById(idEvent).getCode());
+            if(eventManager.getEventById(idEvent)==null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found.");
+            else
+                return ResponseEntity.ok(eventManager.getEventById(idEvent).getCode());
 
         }else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");
@@ -152,6 +155,8 @@ public class UserCallsController {
             String[] parts = id.split(" ");
             int idEvent = Integer.parseInt(parts[0]);
 
+            if(eventManager.getEventById(idEvent) == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found.");
 
             return ResponseEntity.ok(eventManager.getEventById(idEvent).getUsersPresentString());
 
@@ -178,6 +183,8 @@ public class UserCallsController {
             //String email = parts[1];
             event ev = eventManager.getEventByCode(code);
             if(ev!=null) {
+                if (ev.checkPresenceEmail(subject))
+                    return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Already registred.");
                 ev.addPresence(userManager.getUser(authentication.getName()));
                 eventManager.editEvent(ev.getId(), ev);
             }else{
