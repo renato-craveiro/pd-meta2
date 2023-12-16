@@ -217,7 +217,7 @@ public class UserCallsController {
                 }
             }
             if (counter == 0)
-                return ResponseEntity.ok("Nao foram encontrados eventos!");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No events found");
 
 
             return ResponseEntity.ok(sb);
@@ -238,6 +238,237 @@ public class UserCallsController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");
 
     }
+
+
+    @PostMapping("filterPresences")
+    public ResponseEntity filterPresences(Authentication authentication,
+                                      @RequestBody String body) throws ParseException {
+
+
+        String subject = authentication.getName();
+        Jwt userDetails = (Jwt) authentication.getPrincipal();
+        String scope = userDetails.getClaim("scope");
+
+        if(authentication.getAuthorities().toString().contains("USER")){
+            String DB_PATH = SQLITEDB;
+
+            eventManagement eventManager = new eventManagement(new EventDatabaseManager(DB_PATH));
+            StringBuilder sb = new StringBuilder();
+            int counter = 0;
+
+            String[] parts = body.split(" ");
+            String code = parts[0];
+            String name = null, local = null, date = null;
+            boolean getName=false, getLocal=false, getDate=false;
+
+            for (int i=0;i<parts.length;i+=2) {
+                if (parts[i].equals("1")) {
+                    getName=true;
+                    name = parts[i + 1];
+                }if (parts[i].equals("2")) {
+                    getLocal=true;
+                    local = parts[i + 1];
+                }if (parts[i].equals("3")) {
+                    getDate=true;
+                    date = parts[i + 1];
+                }
+            }
+
+
+            if (getName && getLocal && getDate){
+                for (event e : eventManager.getEvents()) {
+                    if (e.checkPresenceEmail(subject)) {
+                        if (e.getName().equals(name) && e.getFormatDate(e.getDate()).equals(date) && e.getLocal().equals(local)) {
+                            sb.append(e.toClientString());
+                            sb.append("\n");
+                            counter++;
+                        }
+                    }
+                }
+            }else if (getName && getLocal){
+                for (event e : eventManager.getEvents()) {
+                    if (e.checkPresenceEmail(subject)) {
+                        if (e.getName().equals(name) && e.getLocal().equals(local)) {
+                            sb.append(e.toClientString());
+                            sb.append("\n");
+                            counter++;
+                        }
+                    }
+                }
+            }else if (getName && getLocal){
+                for (event e : eventManager.getEvents()) {
+                    if (e.checkPresenceEmail(subject)) {
+                        if (e.getName().equals(name) && e.getLocal().equals(local)) {
+                            sb.append(e.toClientString());
+                            sb.append("\n");
+                            counter++;
+                        }
+                    }
+                }
+            }else if (getDate && getLocal){
+                for (event e : eventManager.getEvents()) {
+                    if (e.checkPresenceEmail(subject)) {
+                        if (e.getFormatDate(e.getDate()).equals(date) && e.getLocal().equals(local)) {
+                            sb.append(e.toClientString());
+                            sb.append("\n");
+                            counter++;
+                        }
+                    }
+                }
+            }else if (getName){
+                for (event e : eventManager.getEvents()) {
+                    if (e.checkPresenceEmail(subject)) {
+                        if (e.getName().equals(name)) {
+                            sb.append(e.toClientString());
+                            sb.append("\n");
+                            counter++;
+                        }
+                    }
+                }
+            }else if (getDate){
+                for (event e : eventManager.getEvents()) {
+                    if (e.checkPresenceEmail(subject)) {
+                        if (e.getFormatDate(e.getDate()).equals(date)) {
+                            sb.append(e.toClientString());
+                            sb.append("\n");
+                            counter++;
+                        }
+                    }
+                }
+            }else if (getLocal){
+                for (event e : eventManager.getEvents()) {
+                    if (e.checkPresenceEmail(subject)) {
+                        if (e.getLocal().equals(local)) {
+                            sb.append(e.toClientString());
+                            sb.append("\n");
+                            counter++;
+                        }
+                    }
+                }
+            }
+
+            if (counter == 0)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No events found");
+
+
+            return ResponseEntity.ok(sb);
+
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");
+        }
+    }
+
+
+
+    @PostMapping("filterEvents")
+    public ResponseEntity filterEvents(Authentication authentication,
+                                          @RequestBody String body) throws ParseException {
+
+
+        String subject = authentication.getName();
+        Jwt userDetails = (Jwt) authentication.getPrincipal();
+        String scope = userDetails.getClaim("scope");
+
+        if(authentication.getAuthorities().toString().contains("ADMIN")){
+            String DB_PATH = SQLITEDB;
+
+            eventManagement eventManager = new eventManagement(new EventDatabaseManager(DB_PATH));
+            StringBuilder sb = new StringBuilder();
+            int counter = 0;
+
+            String[] parts = body.split(" ");
+            String code = parts[0];
+            String name = null, local = null, date = null;
+            boolean getName=false, getLocal=false, getDate=false;
+
+            for (int i=0;i<parts.length;i+=2) {
+                if (parts[i].equals("1")) {
+                    getName=true;
+                    name = parts[i + 1];
+                }if (parts[i].equals("2")) {
+                    getLocal=true;
+                    local = parts[i + 1];
+                }if (parts[i].equals("3")) {
+                    getDate=true;
+                    date = parts[i + 1];
+                }
+            }
+
+            if (getName && getLocal && getDate){
+                for (event e : eventManager.getEvents()) {
+                    if (e.getName().equals(name) && e.getFormatDate(e.getDate()).equals(date) && e.getLocal().equals(local)) {
+                        sb.append(e.toClientRESTString());
+                        sb.append("\n");
+                        counter++;
+                    }
+                }
+            }else if (getName && getLocal){
+                for (event e : eventManager.getEvents()) {
+
+                        if (e.getName().equals(name) && e.getLocal().equals(local)) {
+                            sb.append(e.toClientRESTString());
+                            sb.append("\n");
+                            counter++;
+                        }
+                }
+            }else if (getName && getLocal){
+                for (event e : eventManager.getEvents()) {
+                        if (e.getName().equals(name) && e.getLocal().equals(local)) {
+                            sb.append(e.toClientRESTString());
+                            sb.append("\n");
+                            counter++;
+                        }
+
+                }
+            }else if (getDate && getLocal){
+                for (event e : eventManager.getEvents()) {
+                        if (e.getFormatDate(e.getDate()).equals(date) && e.getLocal().equals(local)) {
+                            sb.append(e.toClientRESTString());
+                            sb.append("\n");
+                            counter++;
+                        }
+
+                }
+            }else if (getName){
+                for (event e : eventManager.getEvents()) {
+                        if (e.getName().equals(name)) {
+                            sb.append(e.toClientRESTString());
+                            sb.append("\n");
+                            counter++;
+                        }
+
+                }
+            }else if (getDate){
+                for (event e : eventManager.getEvents()) {
+                        if (e.getFormatDate(e.getDate()).equals(date)) {
+                            sb.append(e.toClientRESTString());
+                            sb.append("\n");
+                            counter++;
+                        }
+
+                }
+            }else if (getLocal){
+                for (event e : eventManager.getEvents()) {
+                        if (e.getLocal().equals(local)) {
+                            sb.append(e.toClientRESTString());
+                            sb.append("\n");
+                            counter++;
+                        }
+
+                }
+            }
+
+            if (counter == 0)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No events found");
+
+
+            return ResponseEntity.ok(sb);
+
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authorized.");
+        }
+    }
+
 
 
 }

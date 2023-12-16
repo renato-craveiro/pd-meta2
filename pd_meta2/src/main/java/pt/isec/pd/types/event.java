@@ -135,8 +135,12 @@ public class event {
 
     public String toClientString() {
         return name + ";" + local + ";" + getFormatDate(date) + ";" + getFormatTime(start);
-
     }
+
+    public String toClientRESTString() {
+        return id + ";" + name + ";" + local + ";" + getFormatDate(date) + ";" + getFormatTime(start) + ";" + getFormatTime(end) + ";" + code;
+    }
+
     public void addPresence(user u){
         usersPresent.add(u);
     }
